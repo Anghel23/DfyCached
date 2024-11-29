@@ -1,0 +1,19 @@
+# Proiect c#
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.runtimeconfig.json
+*.deps.json
+*.cache
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Proiect dafny
+*.dfy.cache
+*.dfycompiled
+*.dfyoutput
+.vscode/
