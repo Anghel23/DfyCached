@@ -17,3 +17,5 @@ obj/
 *.dfycompiled
 *.dfyoutput
 .vscode/
+/Dfy-Side/*.csproj
+/Dfy-Side/*.cs
