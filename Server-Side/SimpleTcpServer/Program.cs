@@ -78,7 +78,7 @@ class Program
         {
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = "../../Dfy-Side/dfy-cached.exe",
+                FileName = "../../Dfy-Side/DfyCached.exe",
                 Arguments = $"\"{command}\"",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
