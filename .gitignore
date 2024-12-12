@@ -11,6 +11,8 @@ obj/
 *.suo
 *.userosscache
 *.sln.docstates
+*.csproj
+*.dtr
 
 # Proiect dafny
 *.dfy.cache
