@@ -49,24 +49,58 @@ method StringToBytes(s: string) returns (result: array<MM.byte>)
   }
 }
 
+method InputToArgs(s: string) returns (args: seq<string>)
+  decreases s
+{
+  var parts := [];
+  var current := """";
+  var i := 0;
+  while i < |s|
+    invariant 0 <= i <= |s|
+    invariant |parts| >= 0
+    decreases |s| - i
+  {
+    if s[i] == ' ' {
+      if |current| > 0 {
+        parts := parts + [current];
+        current := """";
+      }
+    } else {
+      current := current + [s[i]];
+    }
+    i := i + 1;
+  }
+  if |current| > 0 {
+    parts := parts + [current];
+  }
+  args := parts;
+}
+
 method Main(args: seq<string>)
   decreases args
 {
   MM.C.init();
   var input_raw: array<MM.byte> := MM.C.get();
   var input := BytesToString(input_raw[..]);
-  if input == ""command1 arg1"" {
-    var output := ""output1"";
+  var split_input := [];
+  split_input := InputToArgs(input);
+  if |split_input| == 5 && split_input[0] == ""set"" {
+    var key_name := split_input[1];
+    var flags := split_input[2];
+    var exptime := split_input[3];
+    var bytes := split_input[4];
+    var output := """";
     var output_raw := StringToBytes(output);
     MM.C.put(output_raw);
-  } else if input == ""command2"" {
-    var output := ""output2"";
-    var output_raw := StringToBytes(output);
-    MM.C.put(output_raw);
-  } else {
-    var output := ""unknown command"";
-    var output_raw := StringToBytes(output);
-    MM.C.put(output_raw);
+    input_raw := MM.C.get();
+    input := BytesToString(input_raw[..]);
+    split_input := InputToArgs(input);
+    if |split_input| == 1 {
+      var key_name := split_input[0];
+      output := ""END"";
+      output_raw := StringToBytes(output);
+      MM.C.put(output_raw);
+    }
   }
 }
 
@@ -5800,6 +5834,32 @@ namespace _module {
       }
       return result;
     }
+    public static Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> InputToArgs(Dafny.ISequence<Dafny.Rune> s)
+    {
+      Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> args = Dafny.Sequence<Dafny.ISequence<Dafny.Rune>>.Empty;
+      Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> _0_parts;
+      _0_parts = Dafny.Sequence<Dafny.ISequence<Dafny.Rune>>.FromElements();
+      Dafny.ISequence<Dafny.Rune> _1_current;
+      _1_current = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("");
+      BigInteger _2_i;
+      _2_i = BigInteger.Zero;
+      while ((_2_i) < (new BigInteger((s).Count))) {
+        if (((s).Select(_2_i)) == (new Dafny.Rune(' '))) {
+          if ((new BigInteger((_1_current).Count)).Sign == 1) {
+            _0_parts = Dafny.Sequence<Dafny.ISequence<Dafny.Rune>>.Concat(_0_parts, Dafny.Sequence<Dafny.ISequence<Dafny.Rune>>.FromElements(_1_current));
+            _1_current = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("");
+          }
+        } else {
+          _1_current = Dafny.Sequence<Dafny.Rune>.Concat(_1_current, Dafny.Sequence<Dafny.Rune>.FromElements((s).Select(_2_i)));
+        }
+        _2_i = (_2_i) + (BigInteger.One);
+      }
+      if ((new BigInteger((_1_current).Count)).Sign == 1) {
+        _0_parts = Dafny.Sequence<Dafny.ISequence<Dafny.Rune>>.Concat(_0_parts, Dafny.Sequence<Dafny.ISequence<Dafny.Rune>>.FromElements(_1_current));
+      }
+      args = _0_parts;
+      return args;
+    }
     public static void _Main(Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> args)
     {
       MM.C.init();
@@ -5811,30 +5871,45 @@ namespace _module {
       Dafny.ISequence<Dafny.Rune> _out1;
       _out1 = __default.BytesToString(Dafny.Helpers.SeqFromArray(_0_input__raw));
       _1_input = _out1;
-      if ((_1_input).Equals(Dafny.Sequence<Dafny.Rune>.UnicodeFromString("command1 arg1"))) {
-        Dafny.ISequence<Dafny.Rune> _2_output;
-        _2_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("output1");
-        byte[] _3_output__raw;
-        byte[] _out2;
-        _out2 = __default.StringToBytes(_2_output);
-        _3_output__raw = _out2;
-        MM.C.put(_3_output__raw);
-      } else if ((_1_input).Equals(Dafny.Sequence<Dafny.Rune>.UnicodeFromString("command2"))) {
-        Dafny.ISequence<Dafny.Rune> _4_output;
-        _4_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("output2");
-        byte[] _5_output__raw;
+      Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> _2_split__input;
+      _2_split__input = Dafny.Sequence<Dafny.ISequence<Dafny.Rune>>.FromElements();
+      Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> _out2;
+      _out2 = __default.InputToArgs(_1_input);
+      _2_split__input = _out2;
+      if (((new BigInteger((_2_split__input).Count)) == (new BigInteger(5))) && (((_2_split__input).Select(BigInteger.Zero)).Equals(Dafny.Sequence<Dafny.Rune>.UnicodeFromString("set")))) {
+        Dafny.ISequence<Dafny.Rune> _3_key__name;
+        _3_key__name = (_2_split__input).Select(BigInteger.One);
+        Dafny.ISequence<Dafny.Rune> _4_flags;
+        _4_flags = (_2_split__input).Select(new BigInteger(2));
+        Dafny.ISequence<Dafny.Rune> _5_exptime;
+        _5_exptime = (_2_split__input).Select(new BigInteger(3));
+        Dafny.ISequence<Dafny.Rune> _6_bytes;
+        _6_bytes = (_2_split__input).Select(new BigInteger(4));
+        Dafny.ISequence<Dafny.Rune> _7_output;
+        _7_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("");
+        byte[] _8_output__raw;
         byte[] _out3;
-        _out3 = __default.StringToBytes(_4_output);
-        _5_output__raw = _out3;
-        MM.C.put(_5_output__raw);
-      } else {
-        Dafny.ISequence<Dafny.Rune> _6_output;
-        _6_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("unknown command");
-        byte[] _7_output__raw;
+        _out3 = __default.StringToBytes(_7_output);
+        _8_output__raw = _out3;
+        MM.C.put(_8_output__raw);
         byte[] _out4;
-        _out4 = __default.StringToBytes(_6_output);
-        _7_output__raw = _out4;
-        MM.C.put(_7_output__raw);
+        _out4 = MM.C.@get();
+        _0_input__raw = _out4;
+        Dafny.ISequence<Dafny.Rune> _out5;
+        _out5 = __default.BytesToString(Dafny.Helpers.SeqFromArray(_0_input__raw));
+        _1_input = _out5;
+        Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> _out6;
+        _out6 = __default.InputToArgs(_1_input);
+        _2_split__input = _out6;
+        if ((new BigInteger((_2_split__input).Count)) == (BigInteger.One)) {
+          Dafny.ISequence<Dafny.Rune> _9_key__name;
+          _9_key__name = (_2_split__input).Select(BigInteger.Zero);
+          _7_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("END");
+          byte[] _out7;
+          _out7 = __default.StringToBytes(_7_output);
+          _8_output__raw = _out7;
+          MM.C.put(_8_output__raw);
+        }
       }
     }
   }

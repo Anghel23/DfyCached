@@ -40,24 +40,58 @@ method StringToBytes(s: string) returns (result: array<MM.byte>)
     }
 }
 
+method InputToArgs(s: string) returns (args: seq<string>)
+{
+    var parts := [];
+    var current := "";
+    var i := 0;
+    while i < |s|
+        invariant 0 <= i <= |s|
+        invariant |parts| >= 0
+    {
+        if s[i] == ' ' {
+            if |current| > 0 {
+                parts := parts + [current];
+                current := "";
+            }
+        } else {
+            current := current + [s[i]];
+        }
+        i := i + 1;
+    }
+    if |current| > 0 {
+        parts := parts + [current];
+    }
+    args := parts;
+}
+
 method Main(args: seq<string>)
 {
   MM.C.init();
   var input_raw : array<MM.byte> := MM.C.get();
   var input := BytesToString(input_raw[..]);
+  var split_input := [];
+  split_input := InputToArgs(input);
 
-  if (input == "command1 arg1"){
-    var output := "output1";
+  if |split_input| == 5 && split_input[0] == "set"{
+    var key_name := split_input[1];
+    var flags := split_input[2];
+    var exptime := split_input[3];
+    var bytes := split_input[4];
+    var output := "";
     var output_raw := StringToBytes(output);
+
     MM.C.put(output_raw);
-  } else if (input == "command2"){
-    var output := "output2";
-    var output_raw := StringToBytes(output);
-    MM.C.put(output_raw);
-  } else {
-    var output := "unknown command";
-    var output_raw := StringToBytes(output);
-    MM.C.put(output_raw);
+
+    input_raw := MM.C.get();
+    input := BytesToString(input_raw[..]);
+    split_input := InputToArgs(input);
+
+    if |split_input| == 1{
+      var key_name := split_input[0];
+      output := "END";
+      output_raw := StringToBytes(output);
+      MM.C.put(output_raw);
+    }
   }
-
 }
