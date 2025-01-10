@@ -15,7 +15,7 @@ namespace  MM
         public static void put(byte[] buffer)
         {
             C.buffer = buffer;
-            Console.WriteLine("Received: " + Encoding.UTF8.GetString(C.buffer) + ".");
+            Console.WriteLine("Received: " + Encoding.UTF8.GetString(C.buffer));
             Console.Out.Flush();
         }
 

@@ -12,12 +12,62 @@ using System.Collections;
 // Command-line arguments: run --target cs Demo2.dfy --input Demo2x.cs --allow-warnings
 // Demo2.dfy
 
+method BytesToString(bytes: seq<MM.byte>) returns (result: string)
+  ensures |result| == |bytes|
+  ensures forall i: int {:trigger bytes[i]} {:trigger result[i]} :: 0 <= i < |bytes| ==> result[i] == bytes[i] as char
+  decreases bytes
+{
+  var s := """";
+  var i := 0;
+  while i < |bytes|
+    invariant 0 <= i <= |bytes|
+    invariant |s| == i
+    invariant forall j: int {:trigger bytes[j]} {:trigger s[j]} :: 0 <= j < i ==> s[j] == bytes[j] as char
+    decreases |bytes| - i
+  {
+    s := s + [bytes[i] as char];
+    i := i + 1;
+  }
+  result := s;
+}
+
+method StringToBytes(s: string) returns (result: array<MM.byte>)
+  requires forall i: int {:trigger s[i]} :: (0 <= i < |s| ==> 0 <= s[i] as int) && (0 <= i < |s| ==> s[i] as int < 256)
+  ensures result.Length == |s|
+  ensures forall i: int {:trigger s[i]} {:trigger result[i]} :: 0 <= i < |s| ==> result[i] == s[i] as MM.byte
+  decreases s
+{
+  result := new MM.byte[|s|];
+  var i := 0;
+  while i < |s|
+    invariant 0 <= i <= |s|
+    invariant forall j: int {:trigger s[j]} {:trigger result[j]} :: 0 <= j < i ==> result[j] == s[j] as MM.byte
+    decreases |s| - i
+  {
+    result[i] := s[i] as MM.byte;
+    i := i + 1;
+  }
+}
+
 method Main(args: seq<string>)
   decreases args
 {
   MM.C.init();
-  var input_raw := MM.C.get();
-  MM.C.put(input_raw);
+  var input_raw: array<MM.byte> := MM.C.get();
+  var input := BytesToString(input_raw[..]);
+  if input == ""command1 arg1"" {
+    var output := ""output1"";
+    var output_raw := StringToBytes(output);
+    MM.C.put(output_raw);
+  } else if input == ""command2"" {
+    var output := ""output2"";
+    var output_raw := StringToBytes(output);
+    MM.C.put(output_raw);
+  } else {
+    var output := ""unknown command"";
+    var output_raw := StringToBytes(output);
+    MM.C.put(output_raw);
+  }
 }
 
 module {:extern ""MM""} MM {
@@ -5723,6 +5773,33 @@ namespace MM {
 namespace _module {
 
   public partial class __default {
+    public static Dafny.ISequence<Dafny.Rune> BytesToString(Dafny.ISequence<byte> bytes)
+    {
+      Dafny.ISequence<Dafny.Rune> result = Dafny.Sequence<Dafny.Rune>.Empty;
+      Dafny.ISequence<Dafny.Rune> _0_s;
+      _0_s = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("");
+      BigInteger _1_i;
+      _1_i = BigInteger.Zero;
+      while ((_1_i) < (new BigInteger((bytes).Count))) {
+        _0_s = Dafny.Sequence<Dafny.Rune>.Concat(_0_s, Dafny.Sequence<Dafny.Rune>.FromElements(new Dafny.Rune((int)((bytes).Select(_1_i)))));
+        _1_i = (_1_i) + (BigInteger.One);
+      }
+      result = _0_s;
+      return result;
+    }
+    public static byte[] StringToBytes(Dafny.ISequence<Dafny.Rune> s)
+    {
+      byte[] result = new byte[0];
+      byte[] _nw0 = new byte[Dafny.Helpers.ToIntChecked(new BigInteger((s).Count), "array size exceeds memory limit")];
+      result = _nw0;
+      BigInteger _0_i;
+      _0_i = BigInteger.Zero;
+      while ((_0_i) < (new BigInteger((s).Count))) {
+        (result)[(int)((_0_i))] = (byte)(((s).Select(_0_i)).Value);
+        _0_i = (_0_i) + (BigInteger.One);
+      }
+      return result;
+    }
     public static void _Main(Dafny.ISequence<Dafny.ISequence<Dafny.Rune>> args)
     {
       MM.C.init();
@@ -5730,7 +5807,35 @@ namespace _module {
       byte[] _out0;
       _out0 = MM.C.@get();
       _0_input__raw = _out0;
-      MM.C.put(_0_input__raw);
+      Dafny.ISequence<Dafny.Rune> _1_input;
+      Dafny.ISequence<Dafny.Rune> _out1;
+      _out1 = __default.BytesToString(Dafny.Helpers.SeqFromArray(_0_input__raw));
+      _1_input = _out1;
+      if ((_1_input).Equals(Dafny.Sequence<Dafny.Rune>.UnicodeFromString("command1 arg1"))) {
+        Dafny.ISequence<Dafny.Rune> _2_output;
+        _2_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("output1");
+        byte[] _3_output__raw;
+        byte[] _out2;
+        _out2 = __default.StringToBytes(_2_output);
+        _3_output__raw = _out2;
+        MM.C.put(_3_output__raw);
+      } else if ((_1_input).Equals(Dafny.Sequence<Dafny.Rune>.UnicodeFromString("command2"))) {
+        Dafny.ISequence<Dafny.Rune> _4_output;
+        _4_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("output2");
+        byte[] _5_output__raw;
+        byte[] _out3;
+        _out3 = __default.StringToBytes(_4_output);
+        _5_output__raw = _out3;
+        MM.C.put(_5_output__raw);
+      } else {
+        Dafny.ISequence<Dafny.Rune> _6_output;
+        _6_output = Dafny.Sequence<Dafny.Rune>.UnicodeFromString("unknown command");
+        byte[] _7_output__raw;
+        byte[] _out4;
+        _out4 = __default.StringToBytes(_6_output);
+        _7_output__raw = _out4;
+        MM.C.put(_7_output__raw);
+      }
     }
   }
 } // end of namespace _module
