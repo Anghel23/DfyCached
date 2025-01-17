@@ -68,6 +68,7 @@ method InputToArgs(s: string) returns (args: seq<string>)
 method Main(args: seq<string>)
 {
   MM.C.init();
+  
   var input_raw : array<MM.byte> := MM.C.get();
   var input := BytesToString(input_raw[..]);
   var split_input := [];
@@ -91,6 +92,89 @@ method Main(args: seq<string>)
       var key_name := split_input[0];
       output := "END";
       output_raw := StringToBytes(output);
+      MM.C.put(output_raw);
+    }
+  }
+
+  else if |split_input| == 2 && split_input[0] == "get"{
+    var key_name := split_input[1];
+    var output := "END";
+    var output_raw := StringToBytes(output);
+
+    MM.C.put(output_raw);
+  }
+
+  else if |split_input| == 3 && split_input[0] == "incr"{
+    var key_name := split_input[1];
+    var value := split_input[2];
+
+    var output := "END";
+    var output_raw := StringToBytes(output);
+
+    MM.C.put(output_raw);
+  }
+
+  else if |split_input| == 3 && split_input[0] == "decr"{
+    var key_name := split_input[1];
+    var value := split_input[2];
+
+    var output := "END";
+    var output_raw := StringToBytes(output);
+
+    MM.C.put(output_raw);
+  }
+
+  else if |split_input| > 2 && split_input[0] == "gets"{
+    var key_names := split_input[1..];
+
+    var output := "END";
+    var output_raw := StringToBytes(output);
+
+    MM.C.put(output_raw);
+  }
+
+  else if |split_input| == 5 && split_input[0] == "append"{
+    var key_name := split_input[1];
+    var flags := split_input[2];
+    var exptime := split_input[3];
+    var bytes := split_input[4];
+    var output := "";
+    var output_raw := StringToBytes(output);
+
+    MM.C.put(output_raw);
+
+    input_raw := MM.C.get();
+    input := BytesToString(input_raw[..]);
+    split_input := InputToArgs(input);
+
+    if |split_input| == 1{
+      var key_name := split_input[0];
+      output := "END";
+      output_raw := StringToBytes(output);
+
+      MM.C.put(output_raw);
+    }
+  }
+
+  else if |split_input| == 5 && split_input[0] == "prepend"{
+    var key_name := split_input[1];
+    var flags := split_input[2];
+    var exptime := split_input[3];
+    var bytes := split_input[4];
+    var output := "";
+    var output_raw := StringToBytes(output);
+
+    MM.C.put(output_raw);
+
+    input_raw := MM.C.get();
+    input := BytesToString(input_raw[..]);
+    split_input := InputToArgs(input);
+
+    if |split_input| == 1{
+      var key_name := split_input[0];
+      output := "END";
+      output_raw := StringToBytes(output);
+
       MM.C.put(output_raw);
     }
   }
